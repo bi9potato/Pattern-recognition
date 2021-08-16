@@ -1,0 +1,19 @@
+% 读取数据
+load('allData.mat');
+trainData = allData{1};
+k = 100;   
+[coeff,score] = pca(trainData);  
+trainData=trainData*coeff(:,1:k);
+trainY = allData{2};
+testData = allData{3};
+testData=testData*coeff(:,1:k);
+testY = allData{4};
+%参数设置
+epoch = 500;   
+neuros = 40; 
+eta = 0.1;  
+% BP_train
+[network] = BP_train(epoch, neuros, eta, trainData, trainY);
+[pred_label, pred_y] = BP_predict(network, testData);
+acc = sum(pred_label == testY) / size(testY,1);
+fprintf("准确率:3.3f\n",acc);
