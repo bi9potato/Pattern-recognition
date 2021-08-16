@@ -1,0 +1,38 @@
+%%
+clear;clc;close all;
+%%
+testSet = [];
+trainSet = [];
+trainY = [];
+testY = [];
+ 
+DataPath = E:\扬大\模式识别\实验\实验4 5.12\trh\mnist_exp\';
+DataDir = dir(DataPath);
+for i = 1:length(DataDir)
+    if(isequal(DataDir(i).name,'.')||... 
+        isequal(DataDir(i).name,'..')||...
+        ~DataDir(i).isdir) 
+        continue;
+    end
+    faceImgDir = dir([DataPath, DataDir(i).name, '/*.jpg']);
+    imds = imageDatastore([DataPath, DataDir(i).name],'FileExtensions',{'.jpg'});
+    y = str2num(imds.Files{i}(size(imds.Files{i},2)-10));      % label
+    for j = 1:length(imds.Files)
+        url = imds.Files(j);
+        url = url{1};
+        temp = imread(url);
+        if(mod(j, 10) < 7)
+            trainSet = [trainSet; im2double(reshape(temp, 1, [])), str2double(DataDir(i).name)];
+            trainY = [trainY;y];
+        else
+            testSet = [testSet; im2double(reshape(temp, 1, [])), str2double(DataDir(i).name)];
+            testY = [testY;y];
+        end
+    end
+end
+%% ´存储数据
+% allData = {trainSet,trainY,testSet,testY};
+% save('allData','allData');
+%%
+% % 加载数据
+% load('allData.mat');
