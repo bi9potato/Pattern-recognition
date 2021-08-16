@@ -1,0 +1,19 @@
+%% b
+Md1_svm = fitcecoc(trainSet(:, 1:10304), trainSet(:, 10305),  'coding', 'onevsone');
+predict_svm = predict(Md1_svm, testSet);
+accuracy_svm_one = sum(predict_svm == test_label) / length(test_label)
+% 
+Md1_svm = fitcecoc(trainSet(:, 1:10304), trainSet(:, 10305), 'coding', 'onevsall');
+predict_svm = predict(Md1_svm, testSet);
+accuracy_svm_all = sum(predict_svm == test_label) / length(test_label)
+
+%% c
+Md1_knn = fitcknn(trainSet(:, 1:10304), trainSet(:, 10305));
+predict_knn = predict(Md1_knn, testSet);
+accuracy_knn = sum(predict_knn == test_label) / length(test_label)
+
+%% d
+Md1_cnb = fitcnb(trainSet(:, 1:10304), trainSet(:, 10305));
+predict_cnb = predict(Md1_cnb, testSet);
+accuracy_cnb = sum(predict_cnb == test_label) / length(test_label)
+
