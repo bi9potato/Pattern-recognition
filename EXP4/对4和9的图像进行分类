@@ -1,0 +1,90 @@
+function [trainData,trainY,testData,testY] = readData()
+trainData = [];
+trainY = [];
+testData = [];
+testY = [];
+for numClass=0:9
+    if(numClass~=4 & numClass~=9)
+        continue
+    end
+    imds = imageDatastore(fullfile('mnist_4_vs_9',num2str(numClass)),'FileExtensions','.jpg');
+    files = imds.Files;
+    for k=1:size(files,1)
+        len = size(files{k},2);       
+        id = str2num(files{k}(len-8:len-4));
+        x = imread(files{k});
+        x = im2double(x);
+        x = reshape(x,1,28*28);
+        y = str2num(files{k}(len-10));     
+        if(mod(id,10)<7)
+            trainData = [trainData;x];
+            trainY = [trainY;y];
+        else
+            testData = [testData;x];
+            testY = [testY;y];
+        end
+    end
+end
+
+%%
+addpath("BP");
+function [myensemble] = my_adaboost(data,label,M)
+epoch = 200;
+neuros = 20;
+eta = 0.5;
+varData = data ;       
+myensemble = [];            
+t = 1;
+while t <= M                   
+    [network] = BP_train(epoch, neuros, eta, varData, label);
+    [pred_label, ~] = BP_predict(network, varData);
+    acc = sum(pred_label==label) / size(label,1);
+    err = 1-acc;
+    fprintf("第%d个学习器再训练集的分类准确率为%0.3f,",t,acc);
+    a = 1/2 *log((1-err)/err);          
+    multiTimes = ones(size(data,1),1); 
+    for i = 1:size(data,1)
+       if(pred_label(i)==label(i))   
+           multiTimes(i) =  exp(-a);
+       else                             
+           multiTimes(i) =  exp(a);
+       end
+    end
+    Z = sum(multiTimes);               
+    multiTimes =  multiTimes / Z;      
+    multiTimes = multiTimes+1;
+    varData = varData.*multiTimes;
+    myensemble = [myensemble;network,a];     
+    fprintf("¸该学习器的训练误差:%0.3f\n",err);
+    t = t+1;
+end
+end
+
+%% 
+function [pred_label] = adaboost_predict(ensemble,X)
+ all_pred_y = 0;
+for i = 1:size(ensemble,1)    
+    subNetwork = {ensemble{i,1},ensemble{i,2},ensemble{i,3},ensemble{i,4}};
+    [~, sub_pred_y] = BP_predict(subNetwork, X);
+    all_pred_y = all_pred_y + ensemble{i,5} * sub_pred_y;
+end
+[~, pred_label] =max(all_pred_y,[],2);
+pred_label = pred_label -1;
+
+close all; clc; clear;
+%% 加载数据
+load('Data');
+%%
+M = 20; 
+data=trainData;
+label=trainY;
+k = 100;   
+[coeff,score] = pca(trainData);  
+trainData=trainData*coeff(:,1:k);
+testData=testData*coeff(:,1:k);
+%% adaboos
+[myensemble] =my_adaboost(trainData,trainY,M);
+%% predict
+[pred_label] = predict(myensemble,testData);
+rs = sum(pred_label==testY) / size(testY,1);
+fprintf("测试准确率:%3.3f\n",rs);
