@@ -1,0 +1,28 @@
+clear;clc;close all;rng default;
+%%
+k = input('聚类数目：');
+%%
+set = imread('dog.jpg');  
+figure(1); 
+imshow(set);   
+set = im2double(set);     
+[row, col, c] = size(set);
+c1 = set(:, :, 1);
+c2 = set(:, :, 2);
+c3 = set(:, :, 3);
+data = [c1(:), c2(:), c3(:)];
+new_pic = kmeans(data, k);
+new_pic = reshape(new_pic,row,col); 
+imshow(new_pic,[]); % 缩放图像
+%%
+set2 = imread('cherry.jpg');
+figure(2); imshow(set2);
+set2 = im2double(set2);
+[row, col, c] = size(set2);
+c1 = set2(:, :, 1);
+c2 = set2(:, :, 2);
+c3 = set2(:, :, 3);
+data = [c1(:), c2(:), c3(:)];
+new_pic = kmeans(data, k);
+new_pic = reshape(new_pic,row,col); 
+imshow(new_pic,[]);
