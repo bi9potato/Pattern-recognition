@@ -1,0 +1,46 @@
+clear;clc;close all;
+%%
+testSet = [];
+trainSet = [];
+test_label = [];
+%遍历当前文件夹下所有子文件夹中所有图片
+faceDataPath = 'E:\扬大\模式识别\实验\实验3 5.8\trh\orl_faces_original\';
+faceDataDir = dir(faceDataPath);
+for i = 1:length(faceDataDir)
+    if(isequal(faceDataDir(i).name,'.')||... % 去除系统自带的两个隐文件夹
+        isequal(faceDataDir(i).name,'..')||...
+        ~faceDataDir(i).isdir) % 去除遍历中不是文件夹的
+        continue;
+    end
+    faceImgDir = dir([faceDataPath, faceDataDir(i).name, '/*.pgm']);
+    for j = 1 : 7
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        temp = extractLBPFeatures(temp, 'Upright',true,'cellsize',[14 23]);
+        trainSet = [trainSet; im2double(reshape(temp, 1, [])), str2double(strrep(faceDataDir(i).name,'s',''))];
+    end
+    for j = 8 : 10
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        temp = extractLBPFeatures(temp, 'Upright',true,'cellsize',[14 23]);
+        testSet = [testSet; im2double(reshape(temp, 1, []))];
+        test_label = [test_label; str2double(strrep(faceDataDir(i).name,'s',''))];
+    end
+end
+
+%% b
+Md1_svm = fitcecoc(trainSet(:, 1:1888), trainSet(:, 1889),  'coding', 'onevsone');
+predict_svm = predict(Md1_svm, testSet);
+accuracy_svm_one = sum(predict_svm == test_label) / length(test_label)
+% 
+Md1_svm = fitcecoc(trainSet(:, 1:1888), trainSet(:, 1889), 'coding', 'onevsall');
+predict_svm = predict(Md1_svm, testSet);
+accuracy_svm_all = sum(predict_svm == test_label) / length(test_label)
+
+%% c
+Md1_knn = fitcknn(trainSet(:, 1:1888), trainSet(:, 1889));
+predict_knn = predict(Md1_knn, testSet);
+accuracy_knn = sum(predict_knn == test_label) / length(test_label)
+
+%% d
+Md1_cnb = fitcnb(trainSet(:, 1:1888), trainSet(:, 1889), 'DistributionNames', 'kernel');
+predict_cnb = predict(Md1_cnb, testSet);
+accuracy_cnb = sum(predict_cnb == test_label) / length(test_label)
