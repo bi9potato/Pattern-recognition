@@ -1,0 +1,91 @@
+clear;clc;close all;rng default;
+%产生多维正态随机数，mu为期望向量，sigma为协方差矩阵，n为规模。
+set1 = mvnrnd([0 0], [0.5 0; 0 0.5], 1000)
+set2 = mvnrnd([2 3], [0.6 0.1; 0.1 0.6], 1000)
+set3 = mvnrnd([-2 3], [0.5 -0.1; -0.1 0.5], 1000)
+figure(1);
+scatter(set1(:,1), set1(:,2), 36, 'R');hold on;
+scatter(set2(:,1), set2(:,2), 36, 'G');hold on;
+scatter(set3(:,1), set3(:,2), 36, 'B');hold on;
+
+%% k_means
+function [new_center, lable] = k_means(k, set)
+    % 1
+    [m, n] = size(set);% m=行数=数据个数，n=列数
+    center = zeros(k, n);    % 初始化簇中心
+    for j = 1:n             % 随机簇中心（2列随机数）
+        minJ = min(set(:,j));  
+        rangeJ = max(set(:,j))-min(set(:,j));  
+        center(:,j) = minJ+rand(k,1)*rangeJ; %产生区间上的随机数  
+    end
+    lable = zeros(m , 1); % label记录坐标点属于哪个簇。
+    % 2
+    while 1
+        distance = zeros(1, k);   % 存放第i个样本点到第j个聚类中心的距离
+        new_center = zeros(k, n);
+        for i = 1 : m       % 样本点的个数
+            for j = 1 : k   % 聚类中心数目，即确定是哪个簇
+                distance(:, j) = (set(i, :) - center(j, :)) * (set(i, :) - center(j, :))'; % distance(j)：第j 个坐标 与 簇中心的 欧式距离
+            end
+            lable(i, 1) = find(distance == min(distance), 1); % 返回最小距离的下表
+        end
+        % 新的簇中心
+        for i=1 : k
+            new_center(i,:) = mean(set(lable(:, 1)==i,:), 1);% 每一列均值的列向量。
+        end
+        % 若簇中心不改变，停止
+        if new_center == center
+            break;
+        else
+            center = new_center;
+        end
+    end
+end
+
+%% k-medoids
+function [lable, new_center] = k_medoids(k, set)
+    [m, n] = size(set); % m=行数=数据个数，n=列数
+    center_random = round(rand(k,1)*m); % 随机3个坐标作为簇中心，center_random = 坐标索引
+    center = set(center_random, :);
+    
+    lable = zeros(m , 1);      
+    
+    while 1
+        distance = zeros(1, k);   %存放第i个样本点到第j个聚类中心的距离
+        new_center = zeros(k, n);  %新的簇中心
+        
+        % 聚类
+        for i = 1 : m       % 样本数量
+            for j = 1 : k   % 聚类数目
+                distance(:, j) = (set(i, :) - center(j, :)) * (set(i, :) - center(j, :))';% 欧氏距离
+            end
+            lable(i, 1) = find(distance == min(distance),1);
+        end
+ 
+        for i=1:k
+            cluster = set(lable==i,:);       %将第i个簇提取到cluster里面
+            num = size(cluster,1);             %获得第i个簇的样本点的数量=行数
+            sum_dis = zeros(num,1); % 用于存放该簇中对应的每个样本点对应的距离平方的总和
+            % 第j个坐标点到其他坐标点的距离，存sum中
+            for j = 1 : num
+                for x = 1 : num
+%                     if j ~= x
+                        dis = (cluster(j, :) - cluster(x, :)) * (cluster(j, :) - cluster(x, :))';
+                        sum_dis(j,1) = sum_dis(j,1) + dis;
+%                     end
+                end
+            end
+            new_center(i,:) = cluster(sum_dis==min(sum_dis),:); % new_center存到每个坐标点最小距离的坐标
+        end
+        
+        % 若簇中心全都不改变，算法停止
+        if new_center == center
+            break;
+        else
+            center = new_center;
+        end
+        
+    end
+End
+
+
