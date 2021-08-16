@@ -1,0 +1,26 @@
+clear;clc;close all;
+%%
+testSet = [];
+trainSet = [];
+test_label = [];
+%遍历
+faceDataPath = 'E:\扬大\模式识别\实验\实验3 5.8\trh\orl_faces_original\';
+faceDataDir = dir(faceDataPath);
+for i = 1:length(faceDataDir)
+    if(isequal(faceDataDir(i).name,'.')||... % 去除系统自带的两个隐文件夹
+        isequal(faceDataDir(i).name,'..')||...
+        ~faceDataDir(i).isdir) % 去除遍历中不是文件夹的
+        continue;
+    end
+    faceImgDir = dir([faceDataPath, faceDataDir(i).name, '/*.pgm']);
+    for j = 1 : 7
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        trainSet = [trainSet; im2double(reshape(temp, 1, [])), str2double(strrep(faceDataDir(i).name,'s',''))];
+    end
+    for j = 8 : 10
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        testSet = [testSet; im2double(reshape(temp, 1, []))];
+        test_label = [test_label; str2double(strrep(faceDataDir(i).name,'s',''))];
+    end
+end
+
