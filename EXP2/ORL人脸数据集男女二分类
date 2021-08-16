@@ -1,0 +1,41 @@
+clear;clc;close all;
+%% a
+testSet = [];
+trainSet = [];
+test_label = [];
+%遍历 女
+faceDataPath = 'E:\扬大\模式识别\实验\实验3 5.8\trh\orl_faces_gender\female\';
+faceDataDir = dir(faceDataPath);
+for i = 1:length(faceDataDir)
+    if(isequal(faceDataDir(i).name,'.')||isequal(faceDataDir(i).name,'..')|| ~faceDataDir(i).isdir) 
+        continue;
+    end
+    faceImgDir = dir([faceDataPath, faceDataDir(i).name, '/*.pgm']);
+    for j = 1 : 7
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        trainSet = [trainSet; im2double(reshape(temp, 1, [])), 0];
+    end
+    for j = 8 : 10
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        testSet = [testSet; im2double(reshape(temp, 1, []))];
+        test_label = [test_label; 0];
+    end
+end
+%遍历 男
+faceDataPath = 'E:\扬大\模式识别\实验\实验3 5.8\trh\orl_faces_gender\male\';
+faceDataDir = dir(faceDataPath);
+for i = 1:length(faceDataDir)
+    if(isequal(faceDataDir(i).name,'.')||isequal(faceDataDir(i).name,'..')|| ~faceDataDir(i).isdir) 
+        continue;
+    end
+    faceImgDir = dir([faceDataPath, faceDataDir(i).name, '/*.pgm']);
+    for j = 1 : 7
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        trainSet = [trainSet; im2double(reshape(temp, 1, [])), 1];
+    end
+    for j = 8 : 10
+        temp = imread([faceDataPath, faceDataDir(i).name, '/', faceImgDir(j).name]);
+        testSet = [testSet; im2double(reshape(temp, 1, []))];
+        test_label = [test_label; 1];
+    end
+end
