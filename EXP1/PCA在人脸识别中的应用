@@ -1,0 +1,45 @@
+clear;clc;close all;
+%%
+path = 'E:\扬大\模式识别\实验\测试\faces_for_pca';
+img_path = dir(strcat(path,'\*.pgm'));
+img_num = length(img_path);
+data = [];
+
+%%
+%(a)
+for i = 1:img_num
+    % 查找图片
+    img_name = img_path(i).name;% 图片名
+    strcat(path,'\', img_name)
+    picture1 = imread(strcat(path, '\', img_name));%读进来是整数
+    picture = double(picture1)/255;%让其处于0-1之间
+    % 4行7列 显示图片
+    subplot(4,7,i);
+    imshow(picture);
+    figure(1);
+    hold on;
+    % 图片存储到data的一行
+    data = [data;picture(:)'];
+end
+
+%%
+%(b)
+data_mean = mean(data, 1);%按行求mean
+data_mean = reshape(data_mean, 112, 92);
+figure;
+imshow(data_mean);%double 0-1 之间，0黑1白
+
+%%
+%(c)
+pca_picture = pca(data);
+figure; %新建画布
+for i = 1:img_num-1
+    img = reshape(pca_picture(:,i), 112, 92);
+    subplot(4, 7, i);
+    imshow(mat2gray(img));% 放大处理？？？？,不然太小，全黑
+    %imshow(img, []);
+end
+
+%%
+%(d)
+% 27维。查看pca_picture里面维数是27列，因此27维。
