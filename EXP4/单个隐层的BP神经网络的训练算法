@@ -1,0 +1,38 @@
+function [network] = BP_train(epoch, neuros, eta, data, label) 
+[n,m] = size(data) ;  
+w1 = rand(m,neuros); 
+theta1 = rand(1,neuros);
+w2 = rand(neuros,10);  
+theta2 = rand(1,10); 
+for e = 1:epoch
+    randindex = randperm(n);
+    randData = data(randindex,:);
+    randY = label(randindex);
+    allCost = 0;
+    for i = 1:n
+        sampleData = randData(i,:);
+        sampleLabel = zeros(1,10);
+        sampleLabel(randY(i)+1) = 1;
+        A = sampleData * w1;   
+        Y1 = sigmoid(A- theta1); 
+        B = Y1 * w2;    
+        Y2 = sigmoid(B - theta2);       
+        cost = (Y2-sampleLabel)*(Y2-sampleLabel)'/2;
+        allCost = allCost + cost;
+        %
+        tz = sigmoid(theta2) .* (1 - sigmoid(theta2));
+        gradient_theta2 = (-1)*tz .* (Y2-sampleLabel);
+        tz2 = sigmoid(B) .* (1 - sigmoid(B));
+        gradient_w2 = Y1'*tz2.*(Y2-sampleLabel);
+        tz3 = sigmoid(theta1) .* (1 - sigmoid(theta1));
+        gradient_theta1 = (-1)*tz3 .*  (tz2.*(Y2-sampleLabel)* w2' );
+        tz4 = sigmoid(A) .* (1 - sigmoid(A));
+        gradient_w1 = sampleData'*(tz4 .*  (tz2.*(Y2-sampleLabel)* w2' ));
+        w1 = w1 - eta * gradient_w1;
+        theta1  = theta1- eta * gradient_theta1;
+        w2 = w2 - eta * gradient_w2;
+        theta2 = theta2- eta * gradient_theta2;
+    end
+    
+end
+network = {w1,theta1,w2,theta2};
