@@ -1,0 +1,9 @@
+clear;clc;close all;rng default;
+%产生多维正态随机数，mu为期望向量，sigma为协方差矩阵，n为规模。
+set1 = mvnrnd([0 0], [0.5 0; 0 0.5], 1000)
+set2 = mvnrnd([2 3], [0.6 0.1; 0.1 0.6], 1000)
+set3 = mvnrnd([-2 3], [0.5 -0.1; -0.1 0.5], 1000)
+figure(1);
+scatter(set1(:,1), set1(:,2), 36, 'R');hold on;
+scatter(set2(:,1), set2(:,2), 36, 'G');hold on;
+scatter(set3(:,1), set3(:,2), 36, 'B');hold on;
