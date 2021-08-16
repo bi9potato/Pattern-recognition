@@ -1,0 +1,13 @@
+function [pred_label, pred_y] = BP_predict(network, X)
+% 读参数
+w1 = network{1};
+theta1 = network{2};
+w2 = network{3};
+theta2 = network{4};
+% 
+A = X * w1;
+Y1 = sigmoid(A - theta1);
+B = Y1 * w2;
+pred_y = sigmoid(B - theta2);
+[~,pred_label] = max(pred_y,[],2);
+pred_label = pred_label - 1; 
